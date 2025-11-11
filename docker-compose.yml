@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: superset_redis
+    restart: unless-stopped
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - superset-demo
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: superset_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: superset
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: superset
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - superset-demo
+
+  superset:
+    image: apache/superset:3.1.0
+    container_name: superset_app
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - SUPERSET_SECRET_KEY="uMiL/sirll/+Ay9KipdP8bgj5fnbNZAhT8v1MM3hPRQdTGxvs8+ehQLi"
+    ports:
+      - "80:8088"
+    volumes:
+      - ./superset_config.py:/app/pythonpath/superset_config.py
+      - ./data/superset:/app/superset_home
+    networks:
+      - superset-demo
+    command: ["gunicorn", "--bind", "0.0.0.0:8088", "--timeout", "120", "--workers", "4", "superset.app:create_app()"]
+
+networks:
+  superset-demo:
+    external: true
