@@ -22,6 +22,8 @@ services:
       - ./data/postgres:/var/lib/postgresql/data
     networks:
       - superset-demo
+    ports:
+      - "5432:5432"
 
   superset:
     build:
@@ -35,7 +37,7 @@ services:
     environment:
       - SUPERSET_SECRET_KEY="uMiL/sirll/+Ay9KipdP8bgj5fnbNZAhT8v1MM3hPRQdTGxvs8+ehQLi"
     ports:
-      - "80:8088"
+      - "8088:8088"
     volumes:
       - ./superset_config.py:/app/pythonpath/superset_config.py
       - ./data/superset:/app/superset_home
